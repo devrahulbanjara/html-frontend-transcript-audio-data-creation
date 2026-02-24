@@ -1,279 +1,1145 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ConvexHire — Dataset Prep</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConvexHire — Dataset Prep</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-:root {
-  --ink: #0d0f14;
-  --paper: #f5f3ee;
-  --warm: #ede9e0;
-  --card: #faf9f6;
-  --border: #e2ddd5;
-  --border2: #ccc6ba;
-  --accent: #c8401a;
-  --accent-dk: #9e3014;
-  --green: #1a7a4a;
-  --green-lt: #e3f0ea;
-  --blue: #1a4d7a;
-  --muted: #8a8278;
-  --muted2: #b5afa5;
-  --radius: 14px;
-  --shadow: 0 2px 12px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
-  --shadow-lg: 0 8px 40px rgba(0,0,0,.1), 0 2px 8px rgba(0,0,0,.06);
-}
+    :root {
+      --ink: #0d0f14;
+      --paper: #f5f3ee;
+      --warm: #ede9e0;
+      --card: #faf9f6;
+      --border: #e2ddd5;
+      --border2: #ccc6ba;
+      --accent: #c8401a;
+      --accent-dk: #9e3014;
+      --green: #1a7a4a;
+      --green-lt: #e3f0ea;
+      --blue: #1a4d7a;
+      --muted: #8a8278;
+      --muted2: #b5afa5;
+      --radius: 14px;
+      --shadow: 0 2px 12px rgba(0, 0, 0, .07), 0 1px 3px rgba(0, 0, 0, .05);
+      --shadow-lg: 0 8px 40px rgba(0, 0, 0, .1), 0 2px 8px rgba(0, 0, 0, .06);
+    }
 
-body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: 'Sora', sans-serif;
-  min-height: 100vh;
-  padding-bottom: 60px;
-}
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Sora', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
 
-header {
-  background: var(--ink);
-  padding: 0 28px;
-  position: sticky; top: 0; z-index: 100;
-}
-.header-inner {
-  max-width: 720px; margin: auto;
-  display: flex; align-items: center; gap: 16px;
-  padding: 16px 0;
-}
-.logo-mark {
-  width: 40px; height: 40px; border-radius: 10px;
-  background: var(--accent);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 19px; flex-shrink: 0;
-}
-.logo-text h1 { font-size: 15px; font-weight: 700; letter-spacing: -.2px; color: #fff; }
-.logo-text p { font-size: 10.5px; color: #6a6560; margin-top: 2px; letter-spacing: .4px; text-transform: uppercase; }
-.header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-.pill-count {
-  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
-  color: #d4cfc9; border-radius: 20px; padding: 5px 14px;
-  font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace;
-}
-.pill-count span { color: #fff; }
-.btn-refresh {
-  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
-  color: #d4cfc9; border-radius: 8px; padding: 7px 14px;
-  font-size: 12px; font-weight: 600; cursor: pointer;
-  font-family: 'Sora', sans-serif; transition: all .2s;
-}
-.btn-refresh:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    header {
+      background: var(--ink);
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-.prog-strip { background: rgba(255,255,255,.05); border-top: 1px solid rgba(255,255,255,.07); }
-.prog-inner { max-width: 720px; margin: auto; }
-.prog-bar-bg { height: 3px; background: rgba(255,255,255,.08); }
-.prog-bar-fill { height: 100%; background: var(--accent); transition: width .8s cubic-bezier(.4,0,.2,1); }
+    .header-inner {
+      max-width: 720px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+    }
 
-.tip-banner { max-width: 720px; margin: 22px auto 0; padding: 0 20px; }
-.tip-box {
-  background: #fee; border: 2px solid #f44;
-  border-radius: var(--radius); padding: 18px 20px;
-  display: flex; align-items: flex-start; gap: 14px;
-  box-shadow: 0 2px 8px rgba(255, 0, 0, 0.15);
-}
-.tip-icon { font-size: 24px; flex-shrink: 0; margin-top: 1px; }
-.tip-content strong { font-size: 14px; font-weight: 700; color: #c00; display: block; margin-bottom: 6px; }
-.tip-content p { font-size: 13px; line-height: 1.65; color: #600; }
-.tip-content p + p { margin-top: 5px; }
+    .header-logo {
+      height: 42px;
+      width: auto;
+      flex-shrink: 0;
+    }
 
-main {
-  max-width: 720px; margin: 18px auto;
-  padding: 0 20px;
-  display: flex; flex-direction: column; gap: 14px;
-}
+    .page-title-area {
+      max-width: 720px;
+      margin: 24px auto 0;
+      padding: 0 20px;
+      text-align: center;
+    }
 
-.card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); box-shadow: var(--shadow);
-  overflow: hidden; transition: box-shadow .2s;
-}
-.card:hover { box-shadow: var(--shadow-lg); }
-.card-header { padding: 14px 20px 0; display: flex; align-items: center; justify-content: space-between; }
-.sent-badge { font-size: 10.5px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--muted2); }
-.dur-badge { font-size: 10.5px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--muted2); display: none; }
-.dur-badge.vis { display: block; color: var(--accent); }
-.card-body { padding: 12px 20px 20px; }
-.sentence-text { font-size: 17px; line-height: 1.65; color: var(--ink); font-weight: 500; margin-bottom: 18px; }
+    .page-title-area h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -.5px;
+      margin-bottom: 4px;
+    }
 
-.waveform {
-  height: 36px; display: flex; align-items: center; justify-content: center;
-  gap: 4px; margin-bottom: 14px; opacity: 0; transition: opacity .3s;
-}
-.waveform.active { opacity: 1; }
-.wbar { width: 3px; background: var(--accent); border-radius: 99px; animation: wv 1.1s ease-in-out infinite; }
-.wbar:nth-child(1){animation-delay:0s}.wbar:nth-child(2){animation-delay:.1s}.wbar:nth-child(3){animation-delay:.2s}
-.wbar:nth-child(4){animation-delay:.3s}.wbar:nth-child(5){animation-delay:.4s}.wbar:nth-child(6){animation-delay:.3s}
-.wbar:nth-child(7){animation-delay:.2s}.wbar:nth-child(8){animation-delay:.1s}.wbar:nth-child(9){animation-delay:0s}
-@keyframes wv { 0%,100%{height:4px;opacity:.4} 50%{height:30px;opacity:1} }
+    .page-title-area p {
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
 
-.rec-status { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 20px; margin-bottom: 14px; }
-.rec-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: blink 1s infinite; display: none; }
-.rec-dot.vis { display: block; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-.rec-label { font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: .3px; display: none; }
-.rec-label.vis { display: block; }
-.rec-timer { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); display: none; }
-.rec-timer.vis { display: block; }
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-.btn-row { display: flex; gap: 10px; }
-.btn {
-  flex: 1; border: none; border-radius: 10px;
-  padding: 13px 16px; font-size: 13.5px; font-weight: 700;
-  cursor: pointer; font-family: 'Sora', sans-serif;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all .18s; letter-spacing: -.1px;
-}
-.btn:active { transform: scale(.97); }
-.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
-.btn-rec { background: var(--ink); color: #fff; border: 2px solid var(--ink); }
-.btn-rec:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
-.btn-stop { background: var(--accent); color: #fff; border: 2px solid var(--accent); }
-.btn-stop:hover:not(:disabled) { background: var(--accent-dk); border-color: var(--accent-dk); }
+    .pill-count {
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .12);
+      color: #d4cfc9;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
 
-.review-area { display: none; flex-direction: column; gap: 12px; }
-.review-area.show { display: flex; }
-.audio-label { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-audio { width: 100%; height: 42px; outline: none; border-radius: 8px; accent-color: var(--accent); }
-.review-hint {
-  font-size: 12px; color: var(--muted); line-height: 1.55;
-  background: var(--warm); border-radius: 8px; padding: 10px 14px;
-  border: 1px solid var(--border);
-}
-.review-hint strong { color: var(--ink); }
-.review-btns { display: flex; gap: 10px; }
-.btn-send { flex: 2; background: var(--green); color: #fff; border: 2px solid var(--green); }
-.btn-send:hover:not(:disabled) { background: #155c39; border-color: #155c39; }
-.btn-retry { flex: 1; background: transparent; color: var(--muted); border: 2px solid var(--border); }
-.btn-retry:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .pill-count span {
+      color: #fff;
+    }
 
-.uploading { display: none; align-items: center; gap: 12px; padding: 14px; background: var(--warm); border-radius: 10px; border: 1px solid var(--border); }
-.uploading.show { display: flex; }
-.spinner { width: 18px; height: 18px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.uploading p { font-size: 13px; color: var(--muted); font-weight: 500; }
+    .btn-refresh {
+      background: rgba(255, 255, 255, .1);
+      border: 1px solid rgba(255, 255, 255, .15);
+      color: #d4cfc9;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      transition: all .2s;
+    }
 
-.success-block {
-  display: flex; align-items: center; gap: 16px;
-  padding: 20px; background: var(--green-lt);
-  border: 1px solid #b6d9c6; border-radius: var(--radius);
-}
-.ok-circle { width: 42px; height: 42px; border-radius: 50%; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-.ok-text strong { font-size: 14px; font-weight: 700; color: var(--green); display: block; }
-.ok-text span { font-size: 12px; color: #4a9068; font-family: 'JetBrains Mono', monospace; }
+    .btn-refresh:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
 
-.placeholder { text-align: center; padding: 70px 20px; color: var(--muted); }
-.placeholder .icon { font-size: 46px; margin-bottom: 14px; }
-.placeholder p { font-size: 15px; }
+    .prog-strip {
+      background: rgba(255, 255, 255, .05);
+      border-top: 1px solid rgba(255, 255, 255, .07);
+    }
 
-@media(max-width:480px){
-  .sentence-text { font-size: 15.5px; }
-  header { padding: 0 16px; }
-  main, .tip-banner { padding: 0 14px; }
-  .btn { font-size: 13px; padding: 12px 10px; }
-  .logo-text p { display: none; }
-}
-</style>
+    .prog-inner {
+      max-width: 720px;
+      margin: auto;
+    }
+
+    .prog-bar-bg {
+      height: 3px;
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .prog-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width .8s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    /* Skeleton Loader */
+    .skeleton-card {
+      background: rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skeleton-line {
+      height: 14px;
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    .skeleton-line.short {
+      width: 30%;
+    }
+
+    .skeleton-line.medium {
+      width: 60%;
+    }
+
+    .skeleton-line.long {
+      width: 90%;
+    }
+
+    .skeleton-rect {
+      height: 40px;
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .shimmer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(255, 255, 255, 0.6),
+          transparent);
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    /* Footer */
+    footer {
+      max-width: 720px;
+      margin: 60px auto 40px;
+      padding: 0 20px;
+      text-align: center;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      padding-top: 30px;
+    }
+
+    .footer-text {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    .footer-brand {
+      font-weight: 600;
+      color: var(--ink);
+      margin-top: 6px;
+      display: block;
+      opacity: 0.7;
+    }
+
+    .tip-banner {
+      max-width: 720px;
+      margin: 22px auto 0;
+      padding: 0 20px;
+    }
+
+    .tip-box {
+      background: #fee;
+      border: 2px solid #f44;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(255, 0, 0, 0.15);
+    }
+
+    .tip-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .tip-content strong {
+      font-size: 14px;
+      font-weight: 700;
+      color: #c00;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .tip-content p {
+      font-size: 13px;
+      line-height: 1.65;
+      color: #600;
+    }
+
+    .tip-content p+p {
+      margin-top: 5px;
+    }
+
+    main {
+      max-width: 720px;
+      margin: 18px auto;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: box-shadow .2s;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-header {
+      padding: 14px 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sent-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+      color: var(--muted2);
+    }
+
+    .dur-badge {
+      font-size: 10.5px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted2);
+      display: none;
+    }
+
+    .dur-badge.vis {
+      display: block;
+      color: var(--accent);
+    }
+
+    .card-body {
+      padding: 12px 20px 20px;
+    }
+
+    .sentence-text {
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--ink);
+      font-weight: 500;
+      margin-bottom: 18px;
+    }
+
+    .waveform {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 14px;
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .waveform.active {
+      opacity: 1;
+    }
+
+    .wbar {
+      width: 3px;
+      background: var(--accent);
+      border-radius: 99px;
+      animation: wv 1.1s ease-in-out infinite;
+    }
+
+    .wbar:nth-child(1) {
+      animation-delay: 0s
+    }
+
+    .wbar:nth-child(2) {
+      animation-delay: .1s
+    }
+
+    .wbar:nth-child(3) {
+      animation-delay: .2s
+    }
+
+    .wbar:nth-child(4) {
+      animation-delay: .3s
+    }
+
+    .wbar:nth-child(5) {
+      animation-delay: .4s
+    }
+
+    .wbar:nth-child(6) {
+      animation-delay: .3s
+    }
+
+    .wbar:nth-child(7) {
+      animation-delay: .2s
+    }
+
+    .wbar:nth-child(8) {
+      animation-delay: .1s
+    }
+
+    .wbar:nth-child(9) {
+      animation-delay: 0s
+    }
+
+    @keyframes wv {
+
+      0%,
+      100% {
+        height: 4px;
+        opacity: .4
+      }
+
+      50% {
+        height: 30px;
+        opacity: 1
+      }
+    }
+
+    .rec-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 20px;
+      margin-bottom: 14px;
+    }
+
+    .rec-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: blink 1s infinite;
+      display: none;
+    }
+
+    .rec-dot.vis {
+      display: block;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0
+      }
+    }
+
+    .rec-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: .3px;
+      display: none;
+    }
+
+    .rec-label.vis {
+      display: block;
+    }
+
+    .rec-timer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      display: none;
+    }
+
+    .rec-timer.vis {
+      display: block;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      flex: 1;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 16px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all .18s;
+      letter-spacing: -.1px;
+    }
+
+    .btn:active {
+      transform: scale(.97);
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-rec {
+      background: var(--ink);
+      color: #fff;
+      border: 2px solid var(--ink);
+    }
+
+    .btn-rec:hover:not(:disabled) {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-stop {
+      background: var(--accent);
+      color: #fff;
+      border: 2px solid var(--accent);
+    }
+
+    .btn-stop:hover:not(:disabled) {
+      background: var(--accent-dk);
+      border-color: var(--accent-dk);
+    }
+
+    .review-area {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .review-area.show {
+      display: flex;
+    }
+
+    .audio-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    audio {
+      width: 100%;
+      height: 42px;
+      outline: none;
+      border-radius: 8px;
+      accent-color: var(--accent);
+    }
+
+    .review-hint {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+      background: var(--warm);
+      border-radius: 8px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+    }
+
+    .review-hint strong {
+      color: var(--ink);
+    }
+
+    .review-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-send {
+      flex: 2;
+      background: var(--green);
+      color: #fff;
+      border: 2px solid var(--green);
+    }
+
+    .btn-send:hover:not(:disabled) {
+      background: #155c39;
+      border-color: #155c39;
+    }
+
+    .btn-retry {
+      flex: 1;
+      background: transparent;
+      color: var(--muted);
+      border: 2px solid var(--border);
+    }
+
+    .btn-retry:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .uploading {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--warm);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .uploading.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .uploading p {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .success-block {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: var(--green-lt);
+      border: 1px solid #b6d9c6;
+      border-radius: var(--radius);
+    }
+
+    .ok-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .ok-text strong {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--green);
+      display: block;
+    }
+
+    .ok-text span {
+      font-size: 12px;
+      color: #4a9068;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .placeholder {
+      text-align: center;
+      padding: 70px 20px;
+      color: var(--muted);
+    }
+
+    .placeholder .icon {
+      font-size: 46px;
+      margin-bottom: 14px;
+    }
+
+    .placeholder p {
+      font-size: 15px;
+    }
+
+    /* ── New Batch Floating CTA ── */
+    .new-batch-cta {
+      position: fixed;
+      left: 90px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 999;
+      transition: transform .5s cubic-bezier(.34, 1.56, .64, 1), opacity .4s ease;
+    }
+
+    .new-batch-hint {
+      position: absolute;
+      top: -70px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 190px;
+      background: var(--ink);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 11px;
+      line-height: 1.4;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: hint-float 3s ease-in-out infinite;
+    }
+
+    .new-batch-hint::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 6px solid var(--ink);
+    }
+
+    @keyframes hint-float {
+
+      0%,
+      100% {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      50% {
+        transform: translateX(-50%) translateY(-6px);
+      }
+    }
+
+    .new-batch-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 130px;
+      height: 130px;
+      border-radius: 28px;
+      border: 3px solid var(--accent);
+      background: linear-gradient(145deg, var(--accent) 0%, #e84e2a 50%, #ff6b42 100%);
+      color: #fff;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      box-shadow:
+        0 0 0 0 rgba(200, 64, 26, 0.5),
+        0 10px 40px rgba(200, 64, 26, 0.35),
+        0 4px 16px rgba(0, 0, 0, 0.15);
+      animation: cta-pulse 2s ease-in-out infinite, cta-bounce 2.5s ease-in-out infinite, cta-wiggle 4s ease-in-out infinite;
+      transition: transform .15s ease, box-shadow .2s ease;
+      position: relative;
+      overflow: visible;
+    }
+
+    .new-batch-btn::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 34px;
+      border: 2px dashed rgba(200, 64, 26, 0.35);
+      animation: cta-spin-border 8s linear infinite;
+    }
+
+    .new-batch-btn::after {
+      content: '';
+      position: absolute;
+      inset: -16px;
+      border-radius: 42px;
+      background: radial-gradient(circle, rgba(200, 64, 26, 0.15) 0%, transparent 70%);
+      animation: cta-glow-ring 2s ease-in-out infinite;
+    }
+
+    .new-batch-btn:hover {
+      transform: scale(1.12) rotate(-2deg);
+      box-shadow:
+        0 0 0 0 rgba(200, 64, 26, 0.5),
+        0 14px 50px rgba(200, 64, 26, 0.5),
+        0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .new-batch-btn:active {
+      transform: scale(0.95);
+    }
+
+    .new-batch-icon {
+      font-size: 34px;
+      line-height: 1;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .2));
+    }
+
+    .new-batch-label {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, .2);
+    }
+
+    .new-batch-sub {
+      font-size: 9.5px;
+      font-weight: 500;
+      opacity: .85;
+      letter-spacing: .2px;
+    }
+
+    /* Sparkle particles */
+    .cta-sparkle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0;
+      animation: sparkle-fly 2.2s ease-out infinite;
+    }
+
+    .cta-sparkle:nth-child(1) {
+      top: -8px;
+      left: 20%;
+      animation-delay: 0s;
+    }
+
+    .cta-sparkle:nth-child(2) {
+      top: 10%;
+      right: -8px;
+      animation-delay: .5s;
+    }
+
+    .cta-sparkle:nth-child(3) {
+      bottom: -8px;
+      left: 40%;
+      animation-delay: 1s;
+    }
+
+    .cta-sparkle:nth-child(4) {
+      top: 40%;
+      left: -8px;
+      animation-delay: 1.5s;
+    }
+
+    @keyframes cta-pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(200, 64, 26, 0.5), 0 10px 40px rgba(200, 64, 26, 0.35), 0 4px 16px rgba(0, 0, 0, .15);
+      }
+
+      50% {
+        box-shadow: 0 0 0 14px rgba(200, 64, 26, 0), 0 10px 40px rgba(200, 64, 26, 0.45), 0 4px 16px rgba(0, 0, 0, .15);
+      }
+    }
+
+    @keyframes cta-bounce {
+
+      0%,
+      100% {
+        margin-top: 0;
+      }
+
+      40% {
+        margin-top: -12px;
+      }
+
+      60% {
+        margin-top: 4px;
+      }
+
+      80% {
+        margin-top: -4px;
+      }
+    }
+
+    @keyframes cta-wiggle {
+
+      0%,
+      86%,
+      100% {
+        rotate: 0deg;
+      }
+
+      88% {
+        rotate: -5deg;
+      }
+
+      90% {
+        rotate: 5deg;
+      }
+
+      92% {
+        rotate: -4deg;
+      }
+
+      94% {
+        rotate: 4deg;
+      }
+
+      96% {
+        rotate: -2deg;
+      }
+
+      98% {
+        rotate: 0deg;
+      }
+    }
+
+    @keyframes cta-spin-border {
+      to {
+        rotate: 360deg;
+      }
+    }
+
+    @keyframes cta-glow-ring {
+
+      0%,
+      100% {
+        opacity: .4;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: .8;
+        transform: scale(1.08);
+      }
+    }
+
+    @keyframes sparkle-fly {
+      0% {
+        opacity: 0;
+        transform: scale(0) translate(0, 0);
+      }
+
+      20% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(0) translate(calc(var(--dx, 20px)), calc(var(--dy, -20px)));
+      }
+    }
+
+    /* Arrow hint pointing at button */
+    .cta-arrow {
+      position: absolute;
+      right: -48px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      animation: arrow-point 1.5s ease-in-out infinite;
+      filter: drop-shadow(0 1px 4px rgba(0, 0, 0, .15));
+    }
+
+    @keyframes arrow-point {
+
+      0%,
+      100% {
+        transform: translateY(-50%) translateX(0);
+        opacity: .7;
+      }
+
+      50% {
+        transform: translateY(-50%) translateX(8px);
+        opacity: 1;
+      }
+    }
+
+    @media(max-width:480px) {
+      .sentence-text {
+        font-size: 15.5px;
+      }
+
+      header {
+        padding: 0 16px;
+      }
+
+      main,
+      .tip-banner {
+        padding: 0 14px;
+      }
+
+      .btn {
+        font-size: 13px;
+        padding: 12px 10px;
+      }
+
+
+      .new-batch-cta {
+        left: 50%;
+        top: auto;
+        bottom: 25px;
+        transform: translateX(-50%);
+      }
+
+      .new-batch-hint {
+        top: -60px;
+        width: 220px;
+      }
+
+      .cta-arrow {
+        display: none;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
-  <div class="header-inner">
-    <div class="logo-mark">🎙</div>
-    <div class="logo-text">
-      <h1>ConvexHire — Dataset Prep</h1>
-      <p>ASR Training · Rahul Dev Banjara</p>
+  <header>
+    <div class="header-inner">
+      <img src="logo-for-dark-mode.png" alt="ConvexHire" class="header-logo">
+      <div class="header-right">
+        <div class="pill-count"><span id="prog-n">—</span> / <span id="prog-total">—</span></div>
+      </div>
     </div>
-    <div class="header-right">
-      <div class="pill-count"><span id="prog-n">—</span> / <span id="prog-total">—</span></div>
-      <button class="btn-refresh" onclick="fetchBatch()">↺ New Batch</button>
+    <div class="prog-strip">
+      <div class="prog-inner">
+        <div class="prog-bar-bg">
+          <div class="prog-bar-fill" id="prog-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-title-area">
+    <h2>Dataset Prep</h2>
+    <p>For ASR model Training · Rahul Dev Banjara</p>
+  </div>
+
+  <div class="tip-banner">
+    <div class="tip-box">
+      <div class="tip-icon">❌</div>
+      <div class="tip-content">
+        <strong>❌ IMPORTANT: Just read the text shown below — DO NOT answer it! ❌</strong>
+        <p>Some sentences look like questions, but you should only READ them out loud, not answer them. Just speak what
+          you see on screen.</p>
+        <p>Speak naturally at your normal pace. Read the sentence silently first, then hit Record. Stop after you finish
+          the last word. Use a quiet place and keep your device at the same distance.</p>
+      </div>
     </div>
   </div>
-  <div class="prog-strip">
-    <div class="prog-inner">
-      <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill" style="width:0%"></div></div>
+
+  <!-- Floating New Batch CTA -->
+  <div class="new-batch-cta" id="new-batch-cta">
+    <div class="new-batch-hint">
+      Finish your 20, then click here for more! 🚀
     </div>
+    <button class="new-batch-btn" onclick="fetchBatch()" title="Load a fresh batch of 20 sentences">
+      <div class="cta-sparkle" style="--dx:25px;--dy:-25px"></div>
+      <div class="cta-sparkle" style="--dx:30px;--dy:15px"></div>
+      <div class="cta-sparkle" style="--dx:-20px;--dy:25px"></div>
+      <div class="cta-sparkle" style="--dx:-25px;--dy:-15px"></div>
+      <span class="new-batch-icon">🔥</span>
+      <span class="new-batch-label">New Batch</span>
+      <span class="new-batch-sub">20 more to go!</span>
+    </button>
+    <span class="cta-arrow">👈</span>
   </div>
-</header>
 
-<div class="tip-banner">
-  <div class="tip-box">
-    <div class="tip-icon">❌</div>
-    <div class="tip-content">
-      <strong>❌ IMPORTANT: Just read the text shown below — DO NOT answer it! ❌</strong>
-      <p>Some sentences look like questions, but you should only READ them out loud, not answer them. Just speak what you see on screen.</p>
-      <p>Speak naturally at your normal pace. Read the sentence silently first, then hit Record. Stop after you finish the last word. Use a quiet place and keep your device at the same distance.</p>
+  <main id="list">
+    <div class="placeholder">
+      <div class="icon">⏳</div>
+      <p>Fetching sentences…</p>
     </div>
-  </div>
-</div>
+  </main>
 
-<main id="list">
-  <div class="placeholder"><div class="icon">⏳</div><p>Fetching sentences…</p></div>
-</main>
+  <footer>
+    <div class="footer-text">
+      Thank you for contributing to the dataset.
+      <span class="footer-brand">ConvexHire · Dataset Prep</span>
+    </div>
+  </footer>
 
-<script>
-const BASE = "https://vhccmvhqfurneemixcdg.supabase.co";
-const KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoY2NtdmhxZnVybmVlbWl4Y2RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MTI0NzYsImV4cCI6MjA4NzQ4ODQ3Nn0.h0MMh5IuN7CvCqNWz9nNBpmpnfQrQHWiNbH1FnKP63Q";
-const H = { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "application/json" };
+  <script>
+    const BASE = "https://vhccmvhqfurneemixcdg.supabase.co";
+    const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoY2NtdmhxZnVybmVlbWl4Y2RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MTI0NzYsImV4cCI6MjA4NzQ4ODQ3Nn0.h0MMh5IuN7CvCqNWz9nNBpmpnfQrQHWiNbH1FnKP63Q";
+    const H = { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "application/json" };
 
-const S = {};
+    const S = {};
 
-async function fetchBatch() {
-  const list = document.getElementById('list');
-  list.innerHTML = `<div class="placeholder"><div class="icon">⏳</div><p>Loading a fresh batch…</p></div>`;
+    async function fetchBatch() {
+      const list = document.getElementById('list');
 
-  try {
-    // Get total count of all sentences
-    const totalRes = await fetch(`${BASE}/rest/v1/sentences?select=id`, {
-      headers: { ...H, "Prefer": "count=exact", "Range": "0-0" }
-    });
-    const total = parseInt(totalRes.headers.get('content-range')?.split('/')[1] || '0');
-    document.getElementById('prog-total').textContent = total;
-    
-    // Get count of recorded sentences
-    const cntRes = await fetch(`${BASE}/rest/v1/sentences?is_recorded=eq.true&select=id`, {
-      headers: { ...H, "Prefer": "count=exact", "Range": "0-0" }
-    });
-    const n = parseInt(cntRes.headers.get('content-range')?.split('/')[1] || '0');
-    document.getElementById('prog-n').textContent = n;
-    document.getElementById('prog-fill').style.width = Math.min(100, total > 0 ? (n/total)*100 : 0) + '%';
-  } catch(_) {}
+      // Inject Skeleton Loader
+      list.innerHTML = Array(3).fill(0).map(() => `
+        <div class="skeleton-card">
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line long"></div>
+          <div class="skeleton-line medium"></div>
+          <div class="skeleton-rect"></div>
+          <div class="shimmer"></div>
+        </div>
+      `).join('');
 
-  let pool;
-  try {
-    const r = await fetch(`${BASE}/rest/v1/sentences?is_recorded=eq.false&select=*&limit=100`, { headers: H });
-    pool = await r.json();
-  } catch(e) {
-    list.innerHTML = `<div class="placeholder"><div class="icon">⚠️</div><p>${e.message}</p></div>`; return;
-  }
+      try {
+        // Get total count of all sentences
+        const totalRes = await fetch(`${BASE}/rest/v1/sentences?select=id`, {
+          headers: { ...H, "Prefer": "count=exact", "Range": "0-0" }
+        });
+        const total = parseInt(totalRes.headers.get('content-range')?.split('/')[1] || '0');
+        document.getElementById('prog-total').textContent = total;
 
-  if (!pool || !pool.length) {
-    list.innerHTML = `<div class="placeholder"><div class="icon">🎉</div><p>All sentences recorded — great work!</p></div>`; return;
-  }
+        // Get count of recorded sentences
+        const cntRes = await fetch(`${BASE}/rest/v1/sentences?is_recorded=eq.true&select=id`, {
+          headers: { ...H, "Prefer": "count=exact", "Range": "0-0" }
+        });
+        const n = parseInt(cntRes.headers.get('content-range')?.split('/')[1] || '0');
+        document.getElementById('prog-n').textContent = n;
+        document.getElementById('prog-fill').style.width = Math.min(100, total > 0 ? (n / total) * 100 : 0) + '%';
+      } catch (_) { }
 
-  const data = pool.sort(() => Math.random() - .5).slice(0, 20);
-  render(data);
-}
+      let pool;
+      try {
+        const r = await fetch(`${BASE}/rest/v1/sentences?is_recorded=eq.false&select=*&limit=100`, { headers: H });
+        pool = await r.json();
+      } catch (e) {
+        list.innerHTML = `<div class="placeholder"><div class="icon">⚠️</div><p>${e.message}</p></div>`; return;
+      }
 
-function render(sentences) {
-  const list = document.getElementById('list');
-  list.innerHTML = '';
-  sentences.forEach((s, i) => {
-    S[s.id] = { recorder: null, chunks: [], blob: null, url: null, interval: null, elapsed: 0 };
-    const el = document.createElement('div');
-    el.className = 'card'; el.id = `card-${s.id}`;
-    el.innerHTML = `
+      if (!pool || !pool.length) {
+        list.innerHTML = `<div class="placeholder"><div class="icon">🎉</div><p>All sentences recorded — great work!</p></div>`; return;
+      }
+
+      const data = pool.sort(() => Math.random() - .5).slice(0, 20);
+      batchSize = data.length;
+      render(data);
+    }
+
+    function render(sentences) {
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      sentences.forEach((s, i) => {
+        S[s.id] = { recorder: null, chunks: [], blob: null, url: null, interval: null, elapsed: 0 };
+        const el = document.createElement('div');
+        el.className = 'card'; el.id = `card-${s.id}`;
+        el.innerHTML = `
       <div class="card-header">
-        <span class="sent-badge">${i+1} of ${sentences.length}</span>
+        <span class="sent-badge">${i + 1} of ${sentences.length}</span>
         <span class="dur-badge" id="dur-${s.id}">0:00</span>
       </div>
       <div class="card-body">
@@ -309,107 +1175,107 @@ function render(sentences) {
         </div>
       </div>
     `;
-    list.appendChild(el);
-  });
-}
+        list.appendChild(el);
+      });
+    }
 
-function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function fmt(sec) { return `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`; }
+    function esc(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function fmt(sec) { return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; }
 
-async function startRec(id) {
-  let stream;
-  try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
-  catch { alert('Microphone access denied. Please allow microphone access in your browser settings and try again.'); return; }
+    async function startRec(id) {
+      let stream;
+      try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+      catch { alert('Microphone access denied. Please allow microphone access in your browser settings and try again.'); return; }
 
-  const rec = new MediaRecorder(stream);
-  S[id].recorder = rec; S[id].chunks = []; S[id].elapsed = 0;
-  rec.ondataavailable = e => S[id].chunks.push(e.data);
-  rec.onstop = () => {
-    stream.getTracks().forEach(t => t.stop());
-    clearInterval(S[id].interval);
-    const blob = new Blob(S[id].chunks, { type: 'audio/webm' });
-    S[id].blob = blob; S[id].url = URL.createObjectURL(blob);
-    showReview(id);
-  };
-  rec.start();
+      const rec = new MediaRecorder(stream);
+      S[id].recorder = rec; S[id].chunks = []; S[id].elapsed = 0;
+      rec.ondataavailable = e => S[id].chunks.push(e.data);
+      rec.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        clearInterval(S[id].interval);
+        const blob = new Blob(S[id].chunks, { type: 'audio/webm' });
+        S[id].blob = blob; S[id].url = URL.createObjectURL(blob);
+        showReview(id);
+      };
+      rec.start();
 
-  document.getElementById(`row-${id}`).innerHTML = `
+      document.getElementById(`row-${id}`).innerHTML = `
     <button class="btn btn-stop" onclick="stopRec(${id})">
       <svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect width="11" height="11" rx="2"/></svg>
       Stop Recording
     </button>`;
-  document.getElementById(`wave-${id}`).classList.add('active');
-  ['dot','lbl','tmr'].forEach(k => document.getElementById(`${k}-${id}`).classList.add('vis'));
-  S[id].interval = setInterval(() => {
-    S[id].elapsed++;
-    const t = fmt(S[id].elapsed);
-    document.getElementById(`tmr-${id}`).textContent = t;
-    document.getElementById(`dur-${id}`).textContent = t;
-    document.getElementById(`dur-${id}`).classList.add('vis');
-  }, 1000);
-}
+      document.getElementById(`wave-${id}`).classList.add('active');
+      ['dot', 'lbl', 'tmr'].forEach(k => document.getElementById(`${k}-${id}`).classList.add('vis'));
+      S[id].interval = setInterval(() => {
+        S[id].elapsed++;
+        const t = fmt(S[id].elapsed);
+        document.getElementById(`tmr-${id}`).textContent = t;
+        document.getElementById(`dur-${id}`).textContent = t;
+        document.getElementById(`dur-${id}`).classList.add('vis');
+      }, 1000);
+    }
 
-function stopRec(id) { S[id].recorder?.stop(); }
+    function stopRec(id) { S[id].recorder?.stop(); }
 
-function showReview(id) {
-  document.getElementById(`row-${id}`).style.display = 'none';
-  document.getElementById(`wave-${id}`).classList.remove('active');
-  ['dot','lbl','tmr'].forEach(k => document.getElementById(`${k}-${id}`).classList.remove('vis'));
-  document.getElementById(`aud-${id}`).src = S[id].url;
-  document.getElementById(`rev-${id}`).classList.add('show');
-}
+    function showReview(id) {
+      document.getElementById(`row-${id}`).style.display = 'none';
+      document.getElementById(`wave-${id}`).classList.remove('active');
+      ['dot', 'lbl', 'tmr'].forEach(k => document.getElementById(`${k}-${id}`).classList.remove('vis'));
+      document.getElementById(`aud-${id}`).src = S[id].url;
+      document.getElementById(`rev-${id}`).classList.add('show');
+    }
 
-function discardRec(id) {
-  URL.revokeObjectURL(S[id].url);
-  S[id].blob = null; S[id].url = null;
-  document.getElementById(`rev-${id}`).classList.remove('show');
-  document.getElementById(`aud-${id}`).src = '';
-  document.getElementById(`dur-${id}`).textContent = '0:00';
-  document.getElementById(`dur-${id}`).classList.remove('vis');
-  ['dot','lbl','tmr'].forEach(k => document.getElementById(`${k}-${id}`).classList.remove('vis'));
-  document.getElementById(`tmr-${id}`).textContent = '0:00';
-  const row = document.getElementById(`row-${id}`);
-  row.style.display = '';
-  row.innerHTML = `<button class="btn btn-rec" onclick="startRec(${id})"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>Record</button>`;
-}
+    function discardRec(id) {
+      URL.revokeObjectURL(S[id].url);
+      S[id].blob = null; S[id].url = null;
+      document.getElementById(`rev-${id}`).classList.remove('show');
+      document.getElementById(`aud-${id}`).src = '';
+      document.getElementById(`dur-${id}`).textContent = '0:00';
+      document.getElementById(`dur-${id}`).classList.remove('vis');
+      ['dot', 'lbl', 'tmr'].forEach(k => document.getElementById(`${k}-${id}`).classList.remove('vis'));
+      document.getElementById(`tmr-${id}`).textContent = '0:00';
+      const row = document.getElementById(`row-${id}`);
+      row.style.display = '';
+      row.innerHTML = `<button class="btn btn-rec" onclick="startRec(${id})"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>Record</button>`;
+    }
 
-async function sendRec(id) {
-  const blob = S[id].blob;
-  if (!blob) return;
-  document.getElementById(`rev-${id}`).classList.remove('show');
-  document.getElementById(`up-${id}`).classList.add('show');
+    async function sendRec(id) {
+      const blob = S[id].blob;
+      if (!blob) return;
+      document.getElementById(`rev-${id}`).classList.remove('show');
+      document.getElementById(`up-${id}`).classList.add('show');
 
-  const fileName = `audio_${id}_${Date.now()}.webm`;
+      const fileName = `audio_${id}_${Date.now()}.webm`;
 
-  try {
-    const upRes = await fetch(`${BASE}/storage/v1/object/recordings/${fileName}`, {
-      method: 'POST',
-      headers: { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "audio/webm", "x-upsert": "true" },
-      body: blob
-    });
-    if (!upRes.ok) throw new Error(await upRes.text());
-  } catch(e) {
-    alert('Upload failed: ' + e.message);
-    document.getElementById(`up-${id}`).classList.remove('show');
-    showReview(id); return;
-  }
+      try {
+        const upRes = await fetch(`${BASE}/storage/v1/object/recordings/${fileName}`, {
+          method: 'POST',
+          headers: { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "audio/webm", "x-upsert": "true" },
+          body: blob
+        });
+        if (!upRes.ok) throw new Error(await upRes.text());
+      } catch (e) {
+        alert('Upload failed: ' + e.message);
+        document.getElementById(`up-${id}`).classList.remove('show');
+        showReview(id); return;
+      }
 
-  try {
-    const dbRes = await fetch(`${BASE}/rest/v1/sentences?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: { ...H, "Prefer": "return=minimal" },
-      body: JSON.stringify({ is_recorded: true })
-    });
-    if (!dbRes.ok) throw new Error(await dbRes.text());
-  } catch(e) {
-    alert('DB error: ' + e.message);
-    document.getElementById(`up-${id}`).classList.remove('show');
-    showReview(id); return;
-  }
+      try {
+        const dbRes = await fetch(`${BASE}/rest/v1/sentences?id=eq.${id}`, {
+          method: 'PATCH',
+          headers: { ...H, "Prefer": "return=minimal" },
+          body: JSON.stringify({ is_recorded: true })
+        });
+        if (!dbRes.ok) throw new Error(await dbRes.text());
+      } catch (e) {
+        alert('DB error: ' + e.message);
+        document.getElementById(`up-${id}`).classList.remove('show');
+        showReview(id); return;
+      }
 
-  document.getElementById(`up-${id}`).classList.remove('show');
-  const card = document.getElementById(`card-${id}`);
-  card.innerHTML = `
+      document.getElementById(`up-${id}`).classList.remove('show');
+      const card = document.getElementById(`card-${id}`);
+      card.innerHTML = `
     <div class="success-block">
       <div class="ok-circle">✓</div>
       <div class="ok-text">
@@ -417,17 +1283,29 @@ async function sendRec(id) {
         <span>${fileName}</span>
       </div>
     </div>`;
-  card.style.cssText = 'background:transparent;border:none;box-shadow:none';
+      card.style.cssText = 'background:transparent;border:none;box-shadow:none';
 
-  const cur = parseInt(document.getElementById('prog-n').textContent) || 0;
-  const total = parseInt(document.getElementById('prog-total').textContent) || 1;
-  const next = cur + 1;
-  document.getElementById('prog-n').textContent = next;
-  document.getElementById('prog-fill').style.width = Math.min(100, (next/total)*100) + '%';
-  setTimeout(() => card.remove(), 3000);
-}
+      const cur = parseInt(document.getElementById('prog-n').textContent) || 0;
+      const total = parseInt(document.getElementById('prog-total').textContent) || 1;
+      const next = cur + 1;
+      document.getElementById('prog-n').textContent = next;
+      document.getElementById('prog-fill').style.width = Math.min(100, (next / total) * 100) + '%';
+      setTimeout(() => {
+        card.remove();
+        checkBatchComplete();
+      }, 3000);
+    }
 
-window.onload = fetchBatch;
-</script>
+    let batchSize = 0;
+    function checkBatchComplete() {
+      const remaining = document.querySelectorAll('#list .card');
+      if (remaining.length === 0 && batchSize > 0) {
+        // Optional: extra effects
+      }
+    }
+
+    window.onload = fetchBatch;
+  </script>
 </body>
+
 </html>
