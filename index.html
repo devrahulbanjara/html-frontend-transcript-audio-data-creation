@@ -1047,16 +1047,16 @@
   <!-- Floating New Batch CTA -->
   <div class="new-batch-cta" id="new-batch-cta">
     <div class="new-batch-hint">
-      Finish your 20, then click here for more! 🚀
+      Finish your 30, then click here for more! 🚀
     </div>
-    <button class="new-batch-btn" onclick="fetchBatch()" title="Load a fresh batch of 20 sentences">
+    <button class="new-batch-btn" onclick="fetchBatch()" title="Load a fresh batch of 30 sentences">
       <div class="cta-sparkle" style="--dx:25px;--dy:-25px"></div>
       <div class="cta-sparkle" style="--dx:30px;--dy:15px"></div>
       <div class="cta-sparkle" style="--dx:-20px;--dy:25px"></div>
       <div class="cta-sparkle" style="--dx:-25px;--dy:-15px"></div>
       <span class="new-batch-icon">🔥</span>
       <span class="new-batch-label">New Batch</span>
-      <span class="new-batch-sub">20 more to go!</span>
+      <span class="new-batch-sub">30 more to go!</span>
     </button>
     <span class="cta-arrow">👈</span>
   </div>
@@ -1115,7 +1115,7 @@
 
       let pool;
       try {
-        const r = await fetch(`${BASE}/rest/v1/sentences?is_recorded=eq.false&select=*&limit=100`, { headers: H });
+        const r = await fetch(`${BASE}/rest/v1/sentences?is_recorded=eq.false&select=*`, { headers: H });
         pool = await r.json();
       } catch (e) {
         list.innerHTML = `<div class="placeholder"><div class="icon">⚠️</div><p>${e.message}</p></div>`; return;
@@ -1125,7 +1125,9 @@
         list.innerHTML = `<div class="placeholder"><div class="icon">🎉</div><p>All sentences recorded — great work!</p></div>`; return;
       }
 
-      const data = pool.sort(() => Math.random() - .5).slice(0, 20);
+      // Pick exactly 30 random questions from unrecorded ones (or less if fewer available)
+      const batchCount = Math.min(30, pool.length);
+      const data = pool.sort(() => Math.random() - .5).slice(0, batchCount);
       batchSize = data.length;
       render(data);
     }
