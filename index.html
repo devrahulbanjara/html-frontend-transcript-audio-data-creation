@@ -1187,13 +1187,23 @@
       try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
       catch { alert('Microphone access denied. Please allow microphone access in your browser settings and try again.'); return; }
 
-      const rec = new MediaRecorder(stream);
-      S[id].recorder = rec; S[id].chunks = []; S[id].elapsed = 0;
+      // Detect supported MIME type for mobile compatibility
+      let mimeType = 'audio/webm';
+      if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+      } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+        mimeType = 'audio/ogg;codecs=opus';
+      }
+
+      const rec = new MediaRecorder(stream, { mimeType });
+      S[id].recorder = rec; S[id].chunks = []; S[id].elapsed = 0; S[id].mimeType = mimeType;
       rec.ondataavailable = e => S[id].chunks.push(e.data);
       rec.onstop = () => {
         stream.getTracks().forEach(t => t.stop());
         clearInterval(S[id].interval);
-        const blob = new Blob(S[id].chunks, { type: 'audio/webm' });
+        const blob = new Blob(S[id].chunks, { type: mimeType });
         S[id].blob = blob; S[id].url = URL.createObjectURL(blob);
         showReview(id);
       };
@@ -1245,12 +1255,15 @@
       document.getElementById(`rev-${id}`).classList.remove('show');
       document.getElementById(`up-${id}`).classList.add('show');
 
-      const fileName = `audio_${id}_${Date.now()}.webm`;
+      // Use appropriate file extension based on MIME type
+      const mimeType = S[id].mimeType || 'audio/webm';
+      const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+      const fileName = `audio_${id}_${Date.now()}.${ext}`;
 
       try {
         const upRes = await fetch(`${BASE}/storage/v1/object/recordings/${fileName}`, {
           method: 'POST',
-          headers: { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "audio/webm", "x-upsert": "true" },
+          headers: { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": mimeType, "x-upsert": "true" },
           body: blob
         });
         if (!upRes.ok) throw new Error(await upRes.text());
