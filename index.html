@@ -76,14 +76,15 @@ header {
 
 .tip-banner { max-width: 720px; margin: 22px auto 0; padding: 0 20px; }
 .tip-box {
-  background: #e8f0f8; border: 1px solid #c2d4e8;
-  border-radius: var(--radius); padding: 16px 20px;
+  background: #fee; border: 2px solid #f44;
+  border-radius: var(--radius); padding: 18px 20px;
   display: flex; align-items: flex-start; gap: 14px;
+  box-shadow: 0 2px 8px rgba(255, 0, 0, 0.15);
 }
-.tip-icon { font-size: 21px; flex-shrink: 0; margin-top: 1px; }
-.tip-content strong { font-size: 13px; font-weight: 700; color: var(--blue); display: block; margin-bottom: 5px; }
-.tip-content p { font-size: 12.5px; line-height: 1.65; color: #3a5f80; }
-.tip-content p + p { margin-top: 4px; }
+.tip-icon { font-size: 24px; flex-shrink: 0; margin-top: 1px; }
+.tip-content strong { font-size: 14px; font-weight: 700; color: #c00; display: block; margin-bottom: 6px; }
+.tip-content p { font-size: 13px; line-height: 1.65; color: #600; }
+.tip-content p + p { margin-top: 5px; }
 
 main {
   max-width: 720px; margin: 18px auto;
@@ -193,7 +194,7 @@ audio { width: 100%; height: 42px; outline: none; border-radius: 8px; accent-col
       <p>ASR Training · Rahul Dev Banjara</p>
     </div>
     <div class="header-right">
-      <div class="pill-count"><span id="prog-n">—</span> / 2000</div>
+      <div class="pill-count"><span id="prog-n">—</span> / <span id="prog-total">—</span></div>
       <button class="btn-refresh" onclick="fetchBatch()">↺ New Batch</button>
     </div>
   </div>
@@ -206,11 +207,11 @@ audio { width: 100%; height: 42px; outline: none; border-radius: 8px; accent-col
 
 <div class="tip-banner">
   <div class="tip-box">
-    <div class="tip-icon">💬</div>
+    <div class="tip-icon">❌</div>
     <div class="tip-content">
-      <strong>Speak naturally — pretend you're talking to a real person</strong>
-      <p>Read at your normal conversational pace. Don't slow down, over-enunciate, or sound robotic. Natural rhythm and intonation is exactly what the model needs to learn from.</p>
-      <p>Read the sentence silently first, then hit Record. Stop only after you've finished the last word. Find a quiet spot and keep your device at a consistent distance.</p>
+      <strong>❌ IMPORTANT: Just read the text shown below — DO NOT answer it! ❌</strong>
+      <p>Some sentences look like questions, but you should only READ them out loud, not answer them. Just speak what you see on screen.</p>
+      <p>Speak naturally at your normal pace. Read the sentence silently first, then hit Record. Stop after you finish the last word. Use a quiet place and keep your device at the same distance.</p>
     </div>
   </div>
 </div>
@@ -231,12 +232,20 @@ async function fetchBatch() {
   list.innerHTML = `<div class="placeholder"><div class="icon">⏳</div><p>Loading a fresh batch…</p></div>`;
 
   try {
+    // Get total count of all sentences
+    const totalRes = await fetch(`${BASE}/rest/v1/sentences?select=id`, {
+      headers: { ...H, "Prefer": "count=exact", "Range": "0-0" }
+    });
+    const total = parseInt(totalRes.headers.get('content-range')?.split('/')[1] || '0');
+    document.getElementById('prog-total').textContent = total;
+    
+    // Get count of recorded sentences
     const cntRes = await fetch(`${BASE}/rest/v1/sentences?is_recorded=eq.true&select=id`, {
       headers: { ...H, "Prefer": "count=exact", "Range": "0-0" }
     });
     const n = parseInt(cntRes.headers.get('content-range')?.split('/')[1] || '0');
     document.getElementById('prog-n').textContent = n;
-    document.getElementById('prog-fill').style.width = Math.min(100, (n/2000)*100) + '%';
+    document.getElementById('prog-fill').style.width = Math.min(100, total > 0 ? (n/total)*100 : 0) + '%';
   } catch(_) {}
 
   let pool;
@@ -411,9 +420,10 @@ async function sendRec(id) {
   card.style.cssText = 'background:transparent;border:none;box-shadow:none';
 
   const cur = parseInt(document.getElementById('prog-n').textContent) || 0;
+  const total = parseInt(document.getElementById('prog-total').textContent) || 1;
   const next = cur + 1;
   document.getElementById('prog-n').textContent = next;
-  document.getElementById('prog-fill').style.width = Math.min(100, (next/2000)*100) + '%';
+  document.getElementById('prog-fill').style.width = Math.min(100, (next/total)*100) + '%';
   setTimeout(() => card.remove(), 3000);
 }
 
